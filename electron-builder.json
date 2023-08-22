@@ -1,5 +1,5 @@
 {
-  "productName": "超级转码",
+  "productName": "whisperX",
   "appId": "sweetwisdom",
   "asar": true,
   "directories": {
@@ -38,6 +38,6 @@
     "installerIcon": "./public/super.ico",
     "uninstallerIcon": "./public/super.ico",
     "installerHeaderIcon": "./public/super.ico",
-    "shortcutName": "超级转码"
+    "shortcutName": "whisperX"
   }
 }

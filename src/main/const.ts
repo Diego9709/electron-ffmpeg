@@ -1,5 +1,5 @@
 const path = require("path");
-const { app } = require("electron");
+import { app } from "electron";
 
 export const appPath = app.getAppPath();
 
@@ -12,5 +12,6 @@ export const asarPath =
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 export let MERGE_CONFIG_TOOL_PATH = path.join(appPath, isDevelopment ? "./public/tool.exe" : "../public/tool.exe")
-export let MERGE_CONFIG_ICO = path.join(asarPath, "./public/icon/32.ico")
-export const fileType = ["mp4", "flv", "ts", "mkv", "avi", "wmv"]
+export const fileType = ["mp3", "wav", "flac", "aac", "ogg", "wma", "m4a", "ape", "alac", "pcm",
+    "aiff", "au", "mid", "midi", "ra", "amr", "ac3", "dts", "wv", "opus","mp3", "wav", "flac", "aac", "ogg",
+    "wma", "m4a", "ape", "alac", "pcm", "aiff", "au", "mid", "midi", "ra", "amr", "ac3", "dts", "wv", "opus"]

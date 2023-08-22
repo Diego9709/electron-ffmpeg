@@ -1,20 +1,15 @@
 
-import { ipcMain, app, dialog } from 'electron'
-const spawn = require("cross-spawn");
-// var spawn = require("child_process").spawn;
-const child_process = require("child_process");
+import { ipcMain, dialog } from 'electron'
+import spawn from 'cross-spawn';
+import child_process from "child_process";
+import * as os from 'os';
+import { fileType} from './const'
+import path from "path";
 let fs = require("fs")
-
-import { MERGE_CONFIG_TOOL_PATH, fileType, appPath, asarPath } from './const'
-
-const os = require("os");
-
-
+let lastChildProcess: child_process.ChildProcess = {} as child_process.ChildProcess;
 export function initIpc() {
-    let lastChildProcess;
-
-    // 开始写逻辑代码
     ipcMain.handle('selectDic', async (event, arg) => {
+
         const { canceled, filePaths } = await dialog.showOpenDialog(
             {
                 title: "请选择要导入的视频",
@@ -25,17 +20,16 @@ export function initIpc() {
 
         return filePaths[0] ? filePaths[0] + "\\" : ''
 
-
     })
 
     // 开始写逻辑代码
-    ipcMain.handle('selectVidoeFiles', async (event, arg) => {
+    ipcMain.handle('selectVideoFiles', async (event, arg) => {
         const { canceled, filePaths } = await dialog.showOpenDialog(
             {
-                title: "请选择导出视频位置",
+                title: "请选择视频位置/Please select the video location",
                 properties: ["openFile", "multiSelections"],
                 filters: [{
-                    name: "视频格式", extensions: fileType
+                    name: "file format", extensions: fileType
                 }]
             }
 
@@ -43,135 +37,61 @@ export function initIpc() {
 
         return filePaths || []
     })
-    ipcMain.handle("merge-merges", async (event, arg) => {
+    ipcMain.handle("processAudios", async (event, arg) => {
         return await new Promise((resolve, reject) => {
 
-            if (lastChildProcess) {
+            if (lastChildProcess && lastChildProcess.pid) {
                 lastChildProcess.kill();
-                lastChildProcess = null;
             }
 
-            let cmd = "ffmpeg";
-            let env = {
-                ...process.env,
-                PATH: "/usr/local/bin:" + child_process.execSync("echo $PATH").toString(),
-            };
-            function hasFile(path: string) {
-                return fs.existsSync(path)
+            let cmd = 'ffmpeg';
+            let cmder = [];
+            let env = process.env;
 
+            if (os.platform() === 'win32') {
+                // Adjust for Windows
+                const ffmpegPath = path.join(
+                    os.homedir(),
+                    'AppData',
+                    'Roaming',
+                    'WhisperX',
+                    'ffmpeg',
+                    'ffmpeg.exe'
+                );
+                cmd = ffmpegPath;
+            } else if (os.platform() === 'darwin') {
+                // Adjust for macOS
+                env.PATH = '/usr/local/bin:' + env.PATH;
+            } else if (os.platform() === 'linux') {
+                // Adjust for Linux
+                env.PATH = '/usr/local/bin:' + env.PATH;
             }
 
-            if (os.platform() == "win32") {
-                cmd = MERGE_CONFIG_TOOL_PATH;
-
-            }
-
-
-
-            let cmder = ["-y", "-i", `concat:${arg.input}`, "-c", "copy", arg.output]
-            if (arg.filetype == 'wmv' || arg.type == 'wmv' || arg.type == 'mp3') {
-                // cmder = [ "-i", arg.input, '-threads',5,'-preset','ultrafast',arg.output]
-                cmder = ["-i", arg.input, arg.output]
-                // 判断文件是否存在
-                // if (hasFile(arg.output)) {
-                //     resolve({
-                //         msg: '目标文件已存在,请手动删除', path: arg.output
-                //     })
-
-                //     return
-                // }
-            }
+            cmder = ["-i", arg.input, "-f", "s16le", "-acodec", "pcm_s16le", "-ac", "1", "-ar", "44100",'-y', arg.output];
             lastChildProcess = spawn(cmd, cmder, {
                 env: env,
-
-
+                stdio: 'inherit'
             });
 
-            lastChildProcess.stdout.on("data", (data) => {
-                console.log('456');
 
-                // event.reply("merge-merge-result", {
-                //     type: "stdout",
-                //     data: data.toString(),
-                // });
-            });
-            lastChildProcess.stderr.on("data", (data) => {
-                console.log('123');
-
-                // event.reply("merge-merge-result", {
-                //     type: "stderr",
-                //     data: data.toString(),
-                // });
-            });
-            lastChildProcess.on('close', () => {
-                resolve(true)
-                console.log('over');
-
+            lastChildProcess.on('close', (code) => {
+                if (code === 0) {
+                    resolve(true);
+                } else {
+                    console.error(`Child process exited with code ${code}`);
+                    resolve(false);
+                }
 
             })
+
+
             lastChildProcess.on("error", (data) => {
                 console.log(data.toString());
                 resolve(false)
-                // event.reply("merge-merge-result", {
-                //     type: "err",
-                //     data: data.toString(),
-                // });
             });
         })
 
     });
 
-    ipcMain.on("merge-merge", (event, arg) => {
-        if (lastChildProcess) {
-            lastChildProcess.kill();
-            lastChildProcess = null;
-        }
-
-        let cmd = "ffmpeg";
-        let env = {
-            ...process.env,
-            PATH: "/usr/local/bin:" + child_process.execSync("echo $PATH").toString(),
-        };
-
-        if (os.platform() == "win32") {
-            cmd = MERGE_CONFIG_TOOL_PATH;
-        }
-
-
-        lastChildProcess = spawn(cmd, ["-y", "-i", `concat:${arg.input}`, "-c", "copy", arg.output], {
-            env: env,
-        });
-
-        lastChildProcess.stdout.on("data", (data) => {
-            event.reply("merge-merge-result", {
-                type: "stdout",
-                data: data.toString(),
-            });
-        });
-        lastChildProcess.stderr.on("data", (data) => {
-            event.reply("merge-merge-result", {
-                type: "stderr",
-                data: data.toString(),
-            });
-        });
-        lastChildProcess.on("error", (data) => {
-            console.log(data.toString());
-
-            event.reply("merge-merge-result", {
-                type: "err",
-                data: data.toString(),
-            });
-        });
-    });
-    ipcMain.on('init', (event, arg) => {
-        event.reply("merge-merge-result", {
-            type: "path",
-            data: MERGE_CONFIG_TOOL_PATH,
-            appPath,
-            asarPath
-
-
-        });
-    })
 
 }

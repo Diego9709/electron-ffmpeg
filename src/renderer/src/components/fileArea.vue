@@ -1,14 +1,11 @@
 <template>
   <div class="p-2">
-    <!-- <el-button @click="beginStart"> sasdas</el-button> -->
     <div :class="['fileArea', { showFileDrops: showFileDrop }]">
       <!-- 表格 -->
       <el-table tooltip-effect="dark" height="calc(100vh - 230px - 1rem)" style="width: 100%" :row-class-name="tableRowClassName" :data="fileList">
         <template #empty>
           <p>请将文件拖拽到此处</p>
-          <div class="text-center">特别鸣谢:vue3 + vite + element-plus <el-button type="text" @click="openUrl('https://www.bilibili.com/video/BV1TR4y137ZX')"> 使用说明</el-button> <el-button type="text" @click="openUrl('https://space.bilibili.com/329962610')"> 关于我</el-button></div>
         </template>
-
         <el-table-column type="index" width="80px" label="编号" align="center"> </el-table-column>
 
         <el-table-column show-overflow-tooltip prop="name" label="文件名称"> </el-table-column>
@@ -16,7 +13,7 @@
 
         <el-table-column label="操作" width="180px">
           <template #default="{ row, $index }">
-            <el-button type="text" @click="openPath(row.path)"> 📂 </el-button>
+            <el-button type="text" @click="openPath(row.path)"> ▶️ </el-button>
             <el-button type="text" @click="moveUp($index)"> ⬆️ </el-button>
             <el-button type="text" @click="moveDown($index)"> ⬇️ </el-button>
 
@@ -27,9 +24,10 @@
             </el-popconfirm>
           </template>
         </el-table-column>
+
         <el-table-column prop="status" align="center" width="200px" label="状态">
           <template #default="{ row }">
-            <el-button v-if="row.status == 2" type="text" @click="openPath(row.outpath)"> <span>转换完成</span> ✅</el-button>
+            <el-button v-if="row.status == 2" type="text" @click="openPath(row.outpath)"> <span>任务已提交</span> ✅</el-button>
             <span v-else type="text" :loading="row.status == 1">{{ filText(row.status) }}</span>
           </template>
         </el-table-column>
@@ -122,12 +120,7 @@
   }
   function isDrop() {
     showFileDrop.value = !showFileDrop.value;
-    //  打开目录
-    // window.shell.openPath("D:\\phpstudy_pro\\WWW");
   }
-  /**
-   * 删除文件
-   */
   function deleteFile(id: any) {
     let fileLists: Array<any> = fileList.value;
     fileLists.splice(id, 1);
@@ -173,8 +166,8 @@
 <style>
   .fileArea {
     background: #f5f5f5;
-
     border-radius: 30px !important;
+    height: auto;
   }
   .showFileDrops {
     background-color: cornsilk;
@@ -191,6 +184,7 @@
   .el-table .success-row {
     --el-table-tr-bg-color: #12d06863;
   }
+
   @keyframes move {
     0% {
     }
