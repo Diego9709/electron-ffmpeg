@@ -19,7 +19,7 @@ async function bootstrap() {
         height: 760,
         minWidth: 1200, //窗口的最小宽度，单位: 像素值,
         minHeight: 768, //窗口的最小高度，单位: 像素值,
-        title: 'SuperConvert', //窗口的默认标题
+        title: 'WhisperX', //窗口的默认标题
         center: true, //窗口是否在屏幕居中；true or false
         resizable: true, //窗口的大小是否可以；true or false，默认值为true
         webPreferences: {
@@ -40,7 +40,7 @@ async function bootstrap() {
         const pkg = await import('../../package.json')
         const url = `http://${pkg.env.HOST || '127.0.0.1'}:${pkg.env.PORT}`
 
-        win.loadURL(url)
+        await win.loadURL(url)
 
         // win.webContents.openDevTools()
     }
@@ -60,13 +60,13 @@ app.on('window-all-closed', () => {
         app.quit()
     }
 })
-var parseCommand = function () {
+const parseCommand = function () {
     dialog.showMessageBox({
         title: '警告',
         type: 'warning',
         message: '请勿重复打开程序!'
-    })
-}
+    }).then(r => {})
+};
 app.on('second-instance', () => {
     if (win) {
         if (win.isMinimized()) win.restore()
@@ -76,15 +76,4 @@ app.on('second-instance', () => {
     }
 })
 
-// @TODO
-// auto update
-/* if (app.isPackaged) {
-  app.whenReady()
-    .then(() => import('electron-updater'))
-    .then(({ autoUpdater }) => autoUpdater.checkForUpdatesAndNotify())
-    .catch((e) =>
-      // maybe you need to record some log files.
-      console.error('Failed check update:', e)
-    )
-} */
 initIpc()

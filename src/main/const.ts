@@ -11,7 +11,16 @@ export const asarPath =
 
 
 const isDevelopment = process.env.NODE_ENV !== "production";
-export let MERGE_CONFIG_TOOL_PATH = path.join(appPath, isDevelopment ? "./public/tool.exe" : "../public/tool.exe")
+
 export const fileType = ["mp3", "wav", "flac", "aac", "ogg", "wma", "m4a", "ape", "alac", "pcm",
     "aiff", "au", "mid", "midi", "ra", "amr", "ac3", "dts", "wv", "opus","mp3", "wav", "flac", "aac", "ogg",
     "wma", "m4a", "ape", "alac", "pcm", "aiff", "au", "mid", "midi", "ra", "amr", "ac3", "dts", "wv", "opus"]
+
+ export enum TaskStatus {
+    Pending = "Pending",
+    InProgress = "InProgress",
+    Completed = "Completed",
+    Failed = "Failed",
+}
+
+export const wsTaskServe = "ws://backend-url"

@@ -2,7 +2,7 @@
   "name": "public",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.ts",
   "dependencies": {
     "cross-spawn": "^7.0.2"
   },

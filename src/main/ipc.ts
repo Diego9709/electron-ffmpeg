@@ -37,7 +37,7 @@ export function initIpc() {
 
         return filePaths || []
     })
-    ipcMain.handle("processAudios", async (event, arg) => {
+    ipcMain.handle("processAudios", async (event, fileLoc) => {
         return await new Promise((resolve, reject) => {
 
             if (lastChildProcess && lastChildProcess.pid) {
@@ -67,7 +67,7 @@ export function initIpc() {
                 env.PATH = '/usr/local/bin:' + env.PATH;
             }
 
-            cmder = ["-i", arg.input, "-f", "s16le", "-acodec", "pcm_s16le", "-ac", "1", "-ar", "44100",'-y', arg.output];
+            cmder = ["-i", fileLoc, "-f", "s16le", "-acodec", "pcm_s16le", "-ac", "1", "-ar", "44100",'-y', '-'];
             lastChildProcess = spawn(cmd, cmder, {
                 env: env,
                 stdio: 'inherit'
