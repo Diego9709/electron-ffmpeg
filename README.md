@@ -10,12 +10,6 @@
 Special thanks here to [caoxiemeihao ]([electron-vite/electron-vite-boilerplate: Electron + Vite + TypeScript. Support SerialPort, SQLite3 and node C/C++ addons. (github.com)](https://github.com/electron-vite/electron-vite-boilerplate))
 
 
-> note: the wmv format is too slow to be used
-
-**use effects**
-
-![Honeycam 2022-04-12 12-29-07](https://s2.loli.net/2022/04/12/Oz1cML4rpV9Xg6U.gif)
-
 ## project initialization
 
 ### required configuration
