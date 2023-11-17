@@ -1,6 +1,5 @@
 # electron-ffmpeg (super transcoding)
 
-![image-20220412121741509](https://s2.loli.net/2022/04/12/HFYVUe1vKmnp2rC.png)
 
 语言:[中文](./README-zh.md)
 
@@ -10,13 +9,6 @@
 
 Special thanks here to [caoxiemeihao ]([electron-vite/electron-vite-boilerplate: Electron + Vite + TypeScript. Support SerialPort, SQLite3 and node C/C++ addons. (github.com)](https://github.com/electron-vite/electron-vite-boilerplate))
 
-## function
-
-video and audio format conversion
-
-input format = ["mp4", "flv", "ts", "mkv", "avi", "wmv"]
-
-output format = ["mp4", "flv", "ts", "mkv", "avi", "wmv", 'mp3']
 
 > note: the wmv format is too slow to be used
 
