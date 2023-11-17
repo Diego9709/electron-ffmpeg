@@ -2,6 +2,7 @@ import os from 'os'
 import path from 'path'
 import { app, BrowserWindow, Menu, dialog, globalShortcut } from 'electron'
 import { initIpc } from './ipc'
+import fs from "fs";
 // https://stackoverflow.com/questions/42524606/how-to-get-windows-version-using-node-js
 const isWin7 = os.release().startsWith('6.1')
 if (isWin7) app.disableHardwareAcceleration()
@@ -12,10 +13,10 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 let win: BrowserWindow | null = null
-
+import OSS from 'ali-oss'
 async function bootstrap() {
     win = new BrowserWindow({
-        width: 1250,
+        width: 1300,
         height: 760,
         minWidth: 1200, //窗口的最小宽度，单位: 像素值,
         minHeight: 768, //窗口的最小高度，单位: 像素值,
@@ -34,7 +35,7 @@ async function bootstrap() {
 
 
     if (app.isPackaged) {
-        win.loadFile(path.join(__dirname, '../renderer/index.html'))
+        await win.loadFile(path.join(__dirname, '../renderer/index.html'))
         // win.webContents.openDevTools()
     } else {
         const pkg = await import('../../package.json')
@@ -50,9 +51,23 @@ async function bootstrap() {
     globalShortcut.register('CommandOrControl+Alt+Shift+C', function () {
         win.webContents.closeDevTools()
     })
+
 }
 
-app.whenReady().then(bootstrap)
+async function createProgramFile( ){
+    let dir = path.join(
+        os.homedir(),
+        'AppData',
+        'Roaming',
+        'WhisperX',
+        )
+    // create if not exist
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true })
+    }
+}
+
+app.whenReady().then(bootstrap).then(createProgramFile)
 
 app.on('window-all-closed', () => {
     win = null
@@ -75,5 +90,5 @@ app.on('second-instance', () => {
         parseCommand()
     }
 })
-
+export { win }
 initIpc()

@@ -22,12 +22,12 @@
   },
   "extraResources": [
     {
-      "from": "./public/tool.exe",
-      "to": "./public/tool.exe"
+      "from": "./node_modules",
+      "to": "./node_modules"
     },
     {
-      "from": "./public/node_modules",
-      "to": "./node_modules"
+      "from": "./public/ffmpeg.exe",
+      "to": "./public/ffmpeg.exe"
     }
   ],
   "nsis": {

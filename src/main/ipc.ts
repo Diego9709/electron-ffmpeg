@@ -3,19 +3,19 @@ import { ipcMain, dialog } from 'electron'
 import spawn from 'cross-spawn';
 import child_process from "child_process";
 import * as os from 'os';
-import { fileType} from './const'
+import {appPath, fileType} from '../common/const'
 import path from "path";
-let fs = require("fs")
+import fs from "fs";
+import {addToTaskQueue} from "../common/submit";
 let lastChildProcess: child_process.ChildProcess = {} as child_process.ChildProcess;
+const isDevelopment = process.env.NODE_ENV !== "production";
 export function initIpc() {
     ipcMain.handle('selectDic', async (event, arg) => {
-
         const { canceled, filePaths } = await dialog.showOpenDialog(
             {
                 title: "请选择要导入的视频",
                 properties: ['openDirectory']
             }
-
         )
 
         return filePaths[0] ? filePaths[0] + "\\" : ''
@@ -37,7 +37,7 @@ export function initIpc() {
 
         return filePaths || []
     })
-    ipcMain.handle("processAudios", async (event, fileLoc) => {
+    ipcMain.handle("processAudios", async (event, fileTask) => {
         return await new Promise((resolve, reject) => {
 
             if (lastChildProcess && lastChildProcess.pid) {
@@ -51,12 +51,8 @@ export function initIpc() {
             if (os.platform() === 'win32') {
                 // Adjust for Windows
                 const ffmpegPath = path.join(
-                    os.homedir(),
-                    'AppData',
-                    'Roaming',
-                    'WhisperX',
-                    'ffmpeg',
-                    'ffmpeg.exe'
+                    appPath,
+                    isDevelopment ? "./public/ffmpeg.exe" : "../public/ffmpeg.exe"
                 );
                 cmd = ffmpegPath;
             } else if (os.platform() === 'darwin') {
@@ -66,8 +62,25 @@ export function initIpc() {
                 // Adjust for Linux
                 env.PATH = '/usr/local/bin:' + env.PATH;
             }
+            let fileLoc = fileTask.path;
+            let outFileName = fileTask.id + '_' + fileTask.name + '.pcm';
+            let outCache = path.join(
+                os.homedir(),
+                'AppData',
+                'Roaming',
+                'WhisperX',
+                'cache',
+                outFileName
+            )
 
-            cmder = ["-i", fileLoc, "-f", "s16le", "-acodec", "pcm_s16le", "-ac", "1", "-ar", "44100",'-y', '-'];
+            // create cache dir if not exist
+            if (!fs.existsSync(path.dirname(outCache))) {
+                fs.mkdirSync(path.dirname(outCache), { recursive: true });
+            }
+
+
+            cmder = ["-i", fileLoc, "-f", "s16le", "-acodec", "pcm_s16le", "-ac", "1", "-ar", "16000",'-y', outCache];
+
             lastChildProcess = spawn(cmd, cmder, {
                 env: env,
                 stdio: 'inherit'
@@ -76,22 +89,30 @@ export function initIpc() {
 
             lastChildProcess.on('close', (code) => {
                 if (code === 0) {
-                    resolve(true);
+                    console.log(`Child process exited with code ${code},Ready to submit audio file to server.`)
+                    resolve(outCache);
                 } else {
                     console.error(`Child process exited with code ${code}`);
-                    resolve(false);
+                    resolve("");
                 }
 
             })
 
-
             lastChildProcess.on("error", (data) => {
                 console.log(data.toString());
-                resolve(false)
+                resolve("")
             });
+
+
         })
+
+
 
     });
 
+
+    ipcMain.handle("uploadAudio", async (event, taskDetails: string) => {
+        addToTaskQueue(taskDetails);
+    })
 
 }

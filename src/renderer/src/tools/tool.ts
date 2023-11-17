@@ -14,7 +14,7 @@ export function openUrl(path: string) {
 }
 
 export function generateUUID(): string {
-    return uuidv4()
+    return uuidv4();
 }
 
 
